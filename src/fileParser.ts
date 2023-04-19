@@ -1,3 +1,5 @@
+import {XMLParser, XMLValidator} from 'fast-xml-parser'
+
 type OpenValorantEventType = 'open-valorant'
 type OpenCloseEventTypes = 'close-valorant' | 'open-riot' | 'close-riot'
 type DataEventTypes = 'outgoing' | 'incoming'
@@ -33,10 +35,10 @@ export type LogEvent = OpenValorantLogEvent | OpenCloseLogEvent | DataLogEvent
 export interface ParsedLog {
     version: string
     events: LogEvent[]
-}
-
-async function delay(ms: number) {
-    return new Promise(resolve => setTimeout(resolve, ms))
+    xml: {
+        buffer: DataLogEvent[]
+        data: any
+    }[]
 }
 
 export async function parseFile(file: File): Promise<ParsedLog> {
@@ -53,7 +55,8 @@ export async function parseFile(file: File): Promise<ParsedLog> {
 
     const parsed: ParsedLog = {
         version: header.version,
-        events: []
+        events: [],
+        xml: []
     }
 
     for(let i = 1; i < lines.length; i++) {
@@ -61,6 +64,37 @@ export async function parseFile(file: File): Promise<ParsedLog> {
         if(line.length === 0 || line.startsWith('#')) continue
 
         parsed.events.push(JSON.parse(line))
+    }
+
+    const defaultParserOptions = {
+        ignoreAttributes: false,
+        suppressEmptyNode: true,
+        suppressUnpairedNode: true,
+        attributeNamePrefix: ''
+    }
+    const xmlParser = new XMLParser(defaultParserOptions)
+
+    let inputBuffer: DataLogEvent[] = []
+    let outputBuffer: DataLogEvent[] = []
+    for(const event of parsed.events) {
+        if(event.type !== 'outgoing' && event.type !== 'incoming') continue
+        if(event.data === ' ' || event.data.startsWith('<?')) continue
+
+        const buffer = (event.type === 'outgoing' ? outputBuffer : inputBuffer)
+        buffer.push(event)
+
+        const bufferText = buffer.reduce((prev, curr) => prev + curr.data, '')
+        const valid = XMLValidator.validate(`<root>${bufferText}</root>`)
+
+        if(valid === true) {
+            const data = xmlParser.parse(bufferText)
+            parsed.xml.push({
+                buffer: [...buffer],
+                data
+            })
+
+            buffer.length = 0
+        }
     }
 
     return parsed
