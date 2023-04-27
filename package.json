@@ -19,6 +19,7 @@
   "dependencies": {
     "daisyui": "^2.51.5",
     "fast-xml-parser": "^4.2.0",
+    "solid-icons": "^1.0.4",
     "solid-js": "^1.6.10"
   }
 }

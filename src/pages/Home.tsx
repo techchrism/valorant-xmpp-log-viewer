@@ -2,11 +2,11 @@ import type {Component} from 'solid-js'
 import FileUpload from '../components/FileUpload'
 import {ParsedLog} from '../fileParser'
 
-const Home: Component = () => {
-    function onParsed(parsed: ParsedLog) {
-        console.log(parsed)
-    }
+export type HomeProps = {
+    onUpload: (parsedLog: ParsedLog) => void
+}
 
+const Home: Component<HomeProps> = (props) => {
     return (
         <div class="hero mt-20 bg-base-200">
             <div class="hero-content text-center">
@@ -17,7 +17,7 @@ const Home: Component = () => {
                         Use <a class="link" href="https://github.com/techchrism/valorant-xmpp-logger">Valorant XMPP Logger</a> to get XMPP logs.
                     </p>
 
-                    <FileUpload onParse={onParsed}/>
+                    <FileUpload onParse={props.onUpload}/>
                 </div>
             </div>
         </div>

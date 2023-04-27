@@ -6,7 +6,11 @@ module.exports = {
     ],
     darkMode: 'class',
     theme: {
-        extend: {},
+        extend: {
+            gridTemplateColumns: {
+                'main': '300px 1fr'
+            }
+        }
     },
     plugins: [require('daisyui')],
 };
