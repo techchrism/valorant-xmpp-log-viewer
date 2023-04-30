@@ -17,6 +17,7 @@
     "vite-plugin-solid": "^2.5.0"
   },
   "dependencies": {
+    "@alenaksu/json-viewer": "^2.0.1",
     "daisyui": "^2.51.5",
     "fast-xml-parser": "^4.2.0",
     "solid-icons": "^1.0.4",
