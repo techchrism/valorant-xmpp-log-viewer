@@ -1,6 +1,6 @@
 import {Component, ComponentProps, createEffect, createMemo, createSignal, For, onMount, Show} from 'solid-js'
 import {ParsedLog} from '../fileParser'
-import {FiFilter} from 'solid-icons/fi'
+import {FiArrowDownLeft, FiArrowUpRight, FiFilter} from 'solid-icons/fi'
 import LogDisplayListElement from '../components/LogDisplayListElement'
 import '@alenaksu/json-viewer'
 
@@ -21,8 +21,14 @@ const LogDisplay: Component<LogDisplayProps> = (props) => {
     const [activeIndex, setActiveIndex] = createSignal(0)
     const [search, setSearch] = createSignal('')
 
+    // Filters
+    const [showIncoming, setShowIncoming] = createSignal(true)
+    const [showOutgoing, setShowOutgoing] = createSignal(true)
+
     const items = createMemo(() => {
         return props.parsedLog.xml
+            .filter(item => item.buffer[0].type !== 'incoming' || showIncoming())
+            .filter(item => item.buffer[0].type !== 'outgoing' || showOutgoing())
             .filter(item => item.buffer.some(buffer => buffer.data.includes(search())))
     })
     const activeItem = createMemo(() => items()[activeIndex()])
@@ -43,7 +49,19 @@ const LogDisplay: Component<LogDisplayProps> = (props) => {
 
                         <div class="mx-2 flex flex-row">
                             <input type="text" class="input mr-2 flex-grow" placeholder="Search..." oninput={(e) => {setSearch((e.target as HTMLInputElement).value)}}/>
-                            <button class="btn btn-square"><FiFilter title="Filter"/></button>
+                            <div class="dropdown dropdown-end">
+                                <label tabindex="0" class="btn"><FiFilter title="Filter"/></label>
+                                <div tabindex="0" class="dropdown-content p-2 shadow bg-base-100 rounded-box w-52">
+                                    <label class="label cursor-pointer">
+                                        <span class="label-text"><FiArrowDownLeft color="#F97316" class="inline"/> Incoming</span>
+                                        <input type="checkbox" checked class="checkbox" onClick={(e) => setShowIncoming((e.target as HTMLInputElement).checked)}/>
+                                    </label>
+                                    <label class="label cursor-pointer">
+                                        <span class="label-text"><FiArrowUpRight color="#3B82F6" class="inline"/> Outgoing</span>
+                                        <input type="checkbox" checked class="checkbox" onClick={(e) => setShowOutgoing((e.target as HTMLInputElement).checked)}/>
+                                    </label>
+                                </div>
+                            </div>
                         </div>
                     </div>
                     <ul class="menu bg-base-200 text-base-content">
