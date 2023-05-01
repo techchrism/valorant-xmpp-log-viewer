@@ -8,7 +8,7 @@ module.exports = {
     theme: {
         extend: {
             gridTemplateColumns: {
-                'main': '300px 1fr'
+                'main': '350px 1fr'
             }
         }
     },

@@ -1,9 +1,10 @@
 import {Component, ComponentProps, createEffect, createMemo, createSignal, For, onMount, Show} from 'solid-js'
 import {ParsedLog} from '../fileParser'
 import {FiArrowDownLeft, FiArrowUpRight, FiFilter} from 'solid-icons/fi'
-import LogDisplayListElement from '../components/LogDisplayListElement'
 import '@alenaksu/json-viewer'
 import CopyButton from '../components/CopyButton'
+import {VirtualContainer, VirtualItemProps} from '@minht11/solid-virtual-container'
+import LogDisplayListElement from '../components/LogDisplayListElement'
 
 // Types for the json-viewer component, modified from https://stackoverflow.com/a/72239265
 declare module 'solid-js' {
@@ -19,6 +20,7 @@ export type LogDisplayProps = {
 }
 
 const LogDisplay: Component<LogDisplayProps> = (props) => {
+    let sidebarElement!: HTMLElement
     const [activeIndex, setActiveIndex] = createSignal(0)
     const [search, setSearch] = createSignal('')
 
@@ -59,10 +61,22 @@ const LogDisplay: Component<LogDisplayProps> = (props) => {
         }
     }
 
+    const ListItem = (props: VirtualItemProps<ParsedLog['xml'][0]>) => {
+        return (
+            <>
+                <li style={props.style} class='w-full' tabIndex={props.tabIndex} role="listitem">
+                    <a class="w-full py-1 px-2 border-y border-base-100" classList={{active: props.index === activeIndex()}} onClick={() => setActiveIndex(props.index)}>
+                        <LogDisplayListElement item={props.item} />
+                    </a>
+                </li>
+            </>
+        )
+    }
+
     return (
         <>
             <div class="min-h-screen md:grid md:grid-cols-main">
-                <aside class="md:sticky top-0 left-0 md:h-screen overflow-y-auto" aria-label="Sidebar">
+                <aside class="md:sticky top-0 left-0 md:h-screen overflow-y-auto" aria-label="Sidebar" ref={sidebarElement}>
                     <div class="sticky top-0 z-10 bg-base-300 py-2">
                         <h1 class="text-xl font-semibold text-center mb-2">Log Display</h1>
 
@@ -84,21 +98,15 @@ const LogDisplay: Component<LogDisplayProps> = (props) => {
                         </div>
                     </div>
                     <ul class="menu bg-base-200 text-base-content">
-                        <For each={items()}>
-                            {(item, index) => (<>
-                                <li>
-                                    <a class="w-full py-1 px-2 border-y border-base-100" classList={{active: index() === activeIndex()}} onClick={() => setActiveIndex(index())}>
-                                        <LogDisplayListElement item={item}/>
-                                    </a>
-                                </li>
-                            </>)}
-                        </For>
+                        <VirtualContainer items={items()} itemSize={{height: 58}} scrollTarget={sidebarElement}>
+                            {ListItem}
+                        </VirtualContainer>
                     </ul>
                 </aside>
                 <main class="p-5 flex flex-col space-y-5">
                     <Show when={activeItem()}>
                         <div tabindex="0" class="collapse collapse-plus border bg-base-200 rounded-box">
-                            <input type="checkbox" checked/>
+                            <input type="checkbox"/>
                             <div class="collapse-title text-xl font-medium">
                                 XML Data
                             </div>

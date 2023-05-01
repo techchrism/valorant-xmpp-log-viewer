@@ -43,9 +43,9 @@ const LogDisplayListElement: Component<LogDisplayListElementProps> = (props) => 
                     </Show>
 
                 </div>
-                <div class="text-center">
-                    {time().getHours()}:{time().getMinutes()}
-                    <p class="font-light">{Math.round(length() / 100) / 10} Kb</p>
+                <div class="text-center whitespace-nowrap">
+                    {`${time().getHours()}:${time().getMinutes()}`}
+                    <p class="font-light">{`${Math.round(length() / 100) / 10} Kb`}</p>
                 </div>
             </div>
 
