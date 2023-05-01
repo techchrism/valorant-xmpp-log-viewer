@@ -76,11 +76,27 @@ const LogDisplay: Component<LogDisplayProps> = (props) => {
                         </For>
                     </ul>
                 </aside>
-                <main class="p-5">
+                <main class="p-5 flex flex-col space-y-5">
                     <Show when={activeItem()}>
-                        <code class="whitespace-pre-wrap break-all">
-                            <json-viewer data={activeItem().data} ref={jsonViewer}></json-viewer>
-                        </code>
+                        <div tabindex="0" class="collapse collapse-plus border bg-base-200 rounded-box">
+                            <input type="checkbox" checked/>
+                            <div class="collapse-title text-xl font-medium">
+                                XML Data
+                            </div>
+                            <code class="collapse-content break-all">
+                                {activeItem().buffer.map(b => b.data).join('')}
+                            </code>
+                        </div>
+
+                        <div tabindex="0" class="collapse collapse-plus border bg-base-200 rounded-box">
+                            <input type="checkbox" checked/>
+                            <div class="collapse-title text-xl font-medium">
+                                Interactive JSON Representation
+                            </div>
+                            <div class="collapse-content break-all">
+                                <json-viewer data={activeItem().data} ref={jsonViewer}></json-viewer>
+                            </div>
+                        </div>
                     </Show>
                 </main>
             </div>
