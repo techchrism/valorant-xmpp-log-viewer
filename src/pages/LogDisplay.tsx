@@ -3,6 +3,7 @@ import {ParsedLog} from '../fileParser'
 import {FiArrowDownLeft, FiArrowUpRight, FiFilter} from 'solid-icons/fi'
 import LogDisplayListElement from '../components/LogDisplayListElement'
 import '@alenaksu/json-viewer'
+import CopyButton from '../components/CopyButton'
 
 // Types for the json-viewer component, modified from https://stackoverflow.com/a/72239265
 declare module 'solid-js' {
@@ -39,6 +40,24 @@ const LogDisplay: Component<LogDisplayProps> = (props) => {
             jsonViewer.expandAll()
         }
     })
+
+    const copyXML = async () => {
+        try {
+            await navigator.clipboard.writeText(activeItem().buffer.map(b => b.data).join(''))
+            return true
+        } catch(ignored) {
+            return false
+        }
+    }
+
+    const copyJSON = async () => {
+        try {
+            await navigator.clipboard.writeText(JSON.stringify(activeItem().data, null, 4))
+            return true
+        } catch(ignored) {
+            return false
+        }
+    }
 
     return (
         <>
@@ -83,9 +102,16 @@ const LogDisplay: Component<LogDisplayProps> = (props) => {
                             <div class="collapse-title text-xl font-medium">
                                 XML Data
                             </div>
-                            <code class="collapse-content break-all">
-                                {activeItem().buffer.map(b => b.data).join('')}
-                            </code>
+                            <div class="collapse-content">
+                                <div class="mb-2">
+                                    <CopyButton copyCallback={copyXML}>
+                                        Copy XML
+                                    </CopyButton>
+                                </div>
+                                <code class="break-all">
+                                    {activeItem().buffer.map(b => b.data).join('')}
+                                </code>
+                            </div>
                         </div>
 
                         <div tabindex="0" class="collapse collapse-plus border bg-base-200 rounded-box">
@@ -94,6 +120,11 @@ const LogDisplay: Component<LogDisplayProps> = (props) => {
                                 Interactive JSON Representation
                             </div>
                             <div class="collapse-content break-all">
+                                <div class="mb-2">
+                                    <CopyButton copyCallback={copyJSON}>
+                                        Copy JSON
+                                    </CopyButton>
+                                </div>
                                 <json-viewer data={activeItem().data} ref={jsonViewer}></json-viewer>
                             </div>
                         </div>
