@@ -7,11 +7,6 @@ import LogDisplay from './pages/LogDisplay'
 const App: Component = () => {
     const [parsedLog, setParsedLog] = createSignal<ParsedLog | undefined>(undefined)
 
-    /*createEffect(() => {
-        console.log(parsedLog())
-        window.parsedLog = parsedLog()
-    })*/
-
     return (
         <>
             <Show when={parsedLog() !== undefined} fallback={<Home onUpload={parsed => setParsedLog(parsed)}/>}>
