@@ -1,16 +1,22 @@
+# Valorant XMPP Log Viewer
+
+## Features
+
+- Parses XMPP XML structures, even those that span multiple messages
+- Allows for quick searching and filtering of messages
+- Displays decoded presence data
+
 ## Usage
 
-Those templates dependencies are maintained via [pnpm](https://pnpm.io) via `pnpm up -Lri`.
+- Use <https://github.com/techchrism/valorant-xmpp-logger> to generate XMPP log files
+- Visit <https://valxmpplogview.techchrism.me/> and upload the generated log file
+- Browse the individual messages
 
-This is the reason you see a `pnpm-lock.yaml`. That being said, any package manager will work. This file can be safely be removed once you clone a template.
+## Development
 
 ```bash
 $ npm install # or pnpm install or yarn install
 ```
-
-### Learn more on the [Solid Website](https://solidjs.com) and come chat with us on our [Discord](https://discord.com/invite/solidjs)
-
-## Available Scripts
 
 In the project directory, you can run:
 
