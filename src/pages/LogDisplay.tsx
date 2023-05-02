@@ -1,11 +1,11 @@
-import {Component, ComponentProps, createEffect, createMemo, createSignal, For, onMount, Show} from 'solid-js'
+import {Component, ComponentProps, createMemo, createSignal, Show} from 'solid-js'
 import {ParsedLog} from '../fileParser'
 import {FiArrowDownLeft, FiArrowUpRight, FiFilter} from 'solid-icons/fi'
 import '@alenaksu/json-viewer'
-import CopyButton from '../components/CopyButton'
 import {VirtualContainer, VirtualItemProps} from '@minht11/solid-virtual-container'
 import LogDisplayListElement from '../components/LogDisplayListElement'
 import GitHubStar from '../components/GitHubStar'
+import LogElementDetails from '../components/LogElementDetails'
 
 // Types for the json-viewer component, modified from https://stackoverflow.com/a/72239265
 declare module 'solid-js' {
@@ -36,31 +36,6 @@ const LogDisplay: Component<LogDisplayProps> = (props) => {
             .filter(item => item.buffer.some(buffer => buffer.data.includes(search())))
     })
     const activeItem = createMemo(() => items()[activeIndex()])
-
-    let jsonViewer
-    createEffect(() => {
-        if(activeItem()) {
-            jsonViewer.expandAll()
-        }
-    })
-
-    const copyXML = async () => {
-        try {
-            await navigator.clipboard.writeText(activeItem().buffer.map(b => b.data).join(''))
-            return true
-        } catch(ignored) {
-            return false
-        }
-    }
-
-    const copyJSON = async () => {
-        try {
-            await navigator.clipboard.writeText(JSON.stringify(activeItem().data, null, 4))
-            return true
-        } catch(ignored) {
-            return false
-        }
-    }
 
     const ListItem = (props: VirtualItemProps<ParsedLog['xml'][0]>) => {
         return (
@@ -109,37 +84,7 @@ const LogDisplay: Component<LogDisplayProps> = (props) => {
                 </aside>
                 <main class="p-5 flex flex-col space-y-5">
                     <Show when={activeItem()}>
-                        <div tabindex="0" class="collapse collapse-plus border bg-base-200 rounded-box">
-                            <input type="checkbox"/>
-                            <div class="collapse-title text-xl font-medium">
-                                XML Data
-                            </div>
-                            <div class="collapse-content">
-                                <div class="mb-2">
-                                    <CopyButton copyCallback={copyXML}>
-                                        Copy XML
-                                    </CopyButton>
-                                </div>
-                                <code class="break-all">
-                                    {activeItem().buffer.map(b => b.data).join('')}
-                                </code>
-                            </div>
-                        </div>
-
-                        <div tabindex="0" class="collapse collapse-plus border bg-base-200 rounded-box">
-                            <input type="checkbox" checked/>
-                            <div class="collapse-title text-xl font-medium">
-                                Interactive JSON Representation
-                            </div>
-                            <div class="collapse-content break-all">
-                                <div class="mb-2">
-                                    <CopyButton copyCallback={copyJSON}>
-                                        Copy JSON
-                                    </CopyButton>
-                                </div>
-                                <json-viewer data={activeItem().data} ref={jsonViewer}></json-viewer>
-                            </div>
-                        </div>
+                        <LogElementDetails item={activeItem()}/>
                     </Show>
                 </main>
             </div>
