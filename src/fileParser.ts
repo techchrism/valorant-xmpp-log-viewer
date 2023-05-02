@@ -38,7 +38,47 @@ export interface ParsedLog {
     xml: {
         buffer: DataLogEvent[]
         data: any
+        parsed: {
+            type: 'unknown'
+        } | {
+            type: 'chat'
+            message: string
+        } | {
+            type: 'query'
+            id: string
+        } | {
+            type: 'presence'
+            data: any
+        }
     }[]
+}
+
+function parseData(data: any): ParsedLog['xml'][0]['parsed'] {
+    if(data.hasOwnProperty('message')) {
+        return {
+            type: 'chat',
+            message: data.message.body
+        }
+    }
+
+    if(data.hasOwnProperty('iq') && data.iq.hasOwnProperty('id')) {
+        return {
+            type: 'query',
+            id: data.iq.id
+        }
+    }
+
+    if(data.hasOwnProperty('presence') && Object.keys(data).length === 1) {
+        try {
+            const presenceData = JSON.parse(atob(data.presence.games.valorant.p))
+            return {
+                type: 'presence',
+                data: presenceData
+            }
+        } catch(ignored) {}
+    }
+
+    return {type: 'unknown'}
 }
 
 export async function parseFile(file: File): Promise<ParsedLog> {
@@ -90,7 +130,8 @@ export async function parseFile(file: File): Promise<ParsedLog> {
             const data = xmlParser.parse(bufferText)
             parsed.xml.push({
                 buffer: [...buffer],
-                data
+                data,
+                parsed: parseData(data)
             })
 
             buffer.length = 0

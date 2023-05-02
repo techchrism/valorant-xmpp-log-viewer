@@ -12,19 +12,19 @@ const LogDisplayListElement: Component<LogDisplayListElementProps> = (props) => 
     const length = createMemo(() => props.item.buffer.reduce((prev, curr) => prev + curr.data.length, 0))
 
     const title = createMemo(() => {
-        if(props.item.data.hasOwnProperty('presence') && Object.keys(props.item.data).length === 1) {
-            return 'Presence Update'
+        switch(props.item.parsed.type) {
+            case 'chat': return 'Chat'
+            case 'query': return props.item.buffer[0].type === 'incoming' ? 'Query Response' : 'Query'
+            case 'presence': return 'Presence Update'
+            default: return 'Item'
         }
-        return 'Item'
     })
 
     const subtitle = createMemo(() => {
-        if(props.item.data.hasOwnProperty('iq') && props.item.data.iq.hasOwnProperty('id')) {
-            return props.item.data.iq.id
-        } else if(props.item.data.hasOwnProperty('presence') && Object.keys(props.item.data).length === 1) {
-            try {
-                const presenceData = JSON.parse(atob(props.item.data.presence.games.valorant.p))
-            } catch(ignored) {}
+        switch(props.item.parsed.type) {
+            case 'chat': return props.item.parsed.message
+            case 'query': return props.item.parsed.id
+            default: return undefined
         }
     })
 
