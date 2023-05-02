@@ -30,16 +30,16 @@ const LogDisplayListElement: Component<LogDisplayListElementProps> = (props) => 
 
     return (
         <>
-            <div class="flex flex-row items-center space-x-3 w-full">
+            <div class="flex flex-row items-center space-x-3 w-full max-w-full">
                 <div>
                     <Show when={first().type === 'incoming'} fallback={<FiArrowUpRight color="#3B82F6"/>}>
                         <FiArrowDownLeft color="#F97316"/>
                     </Show>
                 </div>
-                <div class="flex-grow">
+                <div class="flex-grow overflow-hidden">
                     {title()}
                     <Show when={subtitle() !== undefined}>
-                        <p>{subtitle()}</p>
+                        <p class="whitespace-nowrap text-ellipsis">{subtitle()}</p>
                     </Show>
 
                 </div>
