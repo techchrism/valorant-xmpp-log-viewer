@@ -1,4 +1,4 @@
-import {Component, createEffect} from 'solid-js'
+import {Component, createEffect, Show} from 'solid-js'
 import CopyButton from './CopyButton'
 import {ParsedLog} from '../fileParser'
 
@@ -8,9 +8,13 @@ export type LogElementDetailsProps = {
 
 const LogElementDetails: Component<LogElementDetailsProps> = (props) => {
     let jsonViewer
+    let presenceJsonViewer
     createEffect(() => {
         if(props.item) {
             jsonViewer.expandAll()
+        }
+        if(props.item.parsed.type === 'presence') {
+            presenceJsonViewer.expandAll()
         }
     })
 
@@ -27,6 +31,18 @@ const LogElementDetails: Component<LogElementDetailsProps> = (props) => {
         try {
             await navigator.clipboard.writeText(JSON.stringify(props.item.data, null, 4))
             return true
+        } catch(ignored) {
+            return false
+        }
+    }
+
+    const copyPresenceJSON = async () => {
+        try {
+            if(props.item.parsed.type === 'presence') {
+                await navigator.clipboard.writeText(JSON.stringify(props.item.parsed.data, null, 4))
+                return true
+            }
+            return false
         } catch(ignored) {
             return false
         }
@@ -65,6 +81,23 @@ const LogElementDetails: Component<LogElementDetailsProps> = (props) => {
                     <json-viewer data={props.item.data} ref={jsonViewer}></json-viewer>
                 </div>
             </div>
+
+            <Show when={props.item.parsed.type === 'presence'}>
+                <div tabindex="0" class="collapse collapse-plus border bg-base-200 rounded-box">
+                    <input type="checkbox" checked/>
+                    <div class="collapse-title text-xl font-medium">
+                        Decoded Presence Data
+                    </div>
+                    <div class="collapse-content break-all">
+                        <div class="mb-2">
+                            <CopyButton copyCallback={copyPresenceJSON}>
+                                Copy JSON
+                            </CopyButton>
+                        </div>
+                        <json-viewer data={props.item.parsed.type === 'presence' ? props.item.parsed.data : {}} ref={presenceJsonViewer}></json-viewer>
+                    </div>
+                </div>
+            </Show>
         </>
     )
 }
