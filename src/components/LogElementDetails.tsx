@@ -1,12 +1,22 @@
-import {Component, createEffect, Show} from 'solid-js'
+import {Component, createEffect, createMemo, createSignal, Show} from 'solid-js'
 import CopyButton from './CopyButton'
 import {ParsedLog} from '../fileParser'
+import {XMLParser} from 'fast-xml-parser'
 
 export type LogElementDetailsProps = {
     item: ParsedLog['xml'][0]
 }
 
 const LogElementDetails: Component<LogElementDetailsProps> = (props) => {
+    const [attributePrefix, setAttributePrefix] = createSignal('')
+    const jsonData = createMemo(() => {
+        const xmlParser = new XMLParser({
+            ignoreAttributes: false,
+            attributeNamePrefix: attributePrefix()
+        })
+        return xmlParser.parse(props.item.buffer.map(b => b.data).join(''))
+    })
+
     let jsonViewer
     let presenceJsonViewer
     createEffect(() => {
@@ -29,7 +39,7 @@ const LogElementDetails: Component<LogElementDetailsProps> = (props) => {
 
     const copyJSON = async () => {
         try {
-            await navigator.clipboard.writeText(JSON.stringify(props.item.data, null, 4))
+            await navigator.clipboard.writeText(JSON.stringify(jsonData(), null, 4))
             return true
         } catch(ignored) {
             return false
@@ -73,12 +83,16 @@ const LogElementDetails: Component<LogElementDetailsProps> = (props) => {
                     Interactive JSON Representation
                 </div>
                 <div class="collapse-content break-all">
+                    <label class="label cursor-pointer justify-start space-x-2">
+                        <input type="checkbox" class="toggle toggle-info" onClick={(e) => setAttributePrefix((e.target as HTMLInputElement).checked ? '@_' : '')}/>
+                        <span class="label-text">Attribute Prefix</span>
+                    </label>
                     <div class="mb-2">
                         <CopyButton copyCallback={copyJSON}>
                             Copy JSON
                         </CopyButton>
                     </div>
-                    <json-viewer data={props.item.data} ref={jsonViewer}></json-viewer>
+                    <json-viewer data={jsonData()} ref={jsonViewer}></json-viewer>
                 </div>
             </div>
 
